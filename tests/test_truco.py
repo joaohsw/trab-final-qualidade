@@ -1,7 +1,7 @@
 # Arquivo: test_truco.py (Corrigido)
 #
 # Testa a classe Truco, usando os métodos públicos (sem underscore)
-# que o seu código realmente usa.
+# que o seu log de erro provou que seu código usa.
 #
 # Para rodar: py -m pytest
 
@@ -16,9 +16,9 @@ def test_truco_inicializacao():
     """
     truco = Truco()
     
-    # CORREÇÃO: Usa get_estado() (sem underscore)
+    # CORREÇÃO: Usa get_estado() e get_pontos() (sem underscore)
     assert truco.get_estado() == 'NAO_CANTADO'
-    assert truco.get_pontos() == 1  # Mão simples vale 1 ponto
+    assert truco.get_pontos() == 1
     assert truco.get_quem_cantou_por_ultimo() is None
 
 # --- Testes de Fluxo de Apostas (Aceitando) ---
