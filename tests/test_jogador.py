@@ -1,9 +1,3 @@
-# Arquivo: test_jogador.py (Corrigido)
-#
-# Testa a classe Jogador, corrigindo os bugs dos testes anteriores.
-#
-# Para rodar: py -m pytest
-
 import pytest
 from unittest.mock import MagicMock
 from truco.jogador import Jogador
@@ -11,7 +5,6 @@ from truco.carta import Carta
 from truco import envido
 from truco import flor
 
-# --- Testes de Inicialização e Estado ---
 
 def test_jogador_criacao():
     """
@@ -20,8 +13,7 @@ def test_jogador_criacao():
     jogador = Jogador("João")
     
     assert jogador.nome == "João"
-    # CORREÇÃO: Acessa o atributo 'mao' diretamente
-    assert jogador.mao == []  # Deve começar com a mão vazia
+    assert jogador.mao == []  
 
 def test_receber_cartas():
     """
@@ -50,13 +42,12 @@ def test_limpar_mao():
     
     jogador.mao = [Carta(1, 'Espadas'), Carta(7, 'Ouros')]
     
-    assert len(jogador.mao) == 2  # Mão não está vazia
+    assert len(jogador.mao) == 2  
     
     jogador.limpar_mao()
     
-    assert len(jogador.mao) == 0  # Mão deve estar vazia
+    assert len(jogador.mao) == 0  
 
-# --- Testes de Ações (Jogar Carta) ---
 
 def test_jogar_carta_por_indice():
     """
@@ -65,7 +56,7 @@ def test_jogar_carta_por_indice():
     jogador = Jogador("João")
     carta1 = Carta(1, 'Espadas')
     carta2 = Carta(7, 'Ouros')
-    jogador.mao = [carta1, carta2] # Coloca as cartas direto na mão
+    jogador.mao = [carta1, carta2] 
     
     carta_jogada = jogador.jogar_carta(1)
     
@@ -73,7 +64,6 @@ def test_jogar_carta_por_indice():
     assert len(jogador.mao) == 1
     assert str(jogador.mao[0]) == str(carta1)
 
-# --- Testes de Lógica de Pontos (Envido e Flor) ---
 
 def test_get_pontos_envido(mocker):
     """
@@ -81,7 +71,6 @@ def test_get_pontos_envido(mocker):
     """
     jogador = Jogador("João")
     
-    # CORREÇÃO: Mock para get_pontos_envido (sem underscore)
     mocker.patch('truco.envido.get_pontos_envido', return_value=27)
     
     cartas_envido_27 = [Carta(7, 'Espadas'), Carta(12, 'Espadas'), Carta(1, 'Ouros')]
@@ -94,7 +83,6 @@ def test_tem_flor(mocker):
     """
     jogador = Jogador("João")
     
-    # CORREÇÃO: Mock para tem_flor (sem underscore)
     mocker.patch('truco.flor.tem_flor', return_value=True)
     
     cartas_com_flor = [Carta(1, 'Ouros'), Carta(7, 'Ouros'), Carta(5, 'Ouros')]
@@ -107,14 +95,12 @@ def test_get_pontos_flor(mocker):
     """
     jogador = Jogador("João")
     
-    # CORREÇÃO: Mock para get_pontos_flor (sem underscore)
     mocker.patch('truco.flor.get_pontos_flor', return_value=32)
 
     cartas_flor_32 = [Carta(5, 'Ouros'), Carta(7, 'Ouros'), Carta(12, 'Ouros')]
     jogador.mao = cartas_flor_32
     assert jogador.get_pontos_flor() == 32
 
-# --- Testes de "Cantar" (Ações) ---
 
 def test_cantar_acoes_simples():
     """
@@ -123,7 +109,6 @@ def test_cantar_acoes_simples():
     """
     jogador = Jogador("João")
     
-    # CORREÇÃO: Removemos 'cantar_envido' que o log disse que não existe
     assert jogador.aceitar() == 'ACEITO'
     assert jogador.nao_aceitar() == 'NAO ACEITO'
     assert jogador.cantar_flor() == 'FLOR'

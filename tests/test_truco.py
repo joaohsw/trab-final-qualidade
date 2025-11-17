@@ -1,14 +1,6 @@
-# Arquivo: test_truco.py (Corrigido)
-#
-# Testa a classe Truco, usando os métodos públicos (sem underscore)
-# que o seu log de erro provou que seu código usa.
-#
-# Para rodar: py -m pytest
-
 import pytest
 from truco.truco import Truco
 
-# --- Testes de Inicialização ---
 
 def test_truco_inicializacao():
     """
@@ -16,12 +8,10 @@ def test_truco_inicializacao():
     """
     truco = Truco()
     
-    # CORREÇÃO: Usa get_estado() e get_pontos() (sem underscore)
     assert truco.get_estado() == 'NAO_CANTADO'
     assert truco.get_pontos() == 1
     assert truco.get_quem_cantou_por_ultimo() is None
 
-# --- Testes de Fluxo de Apostas (Aceitando) ---
 
 def test_fluxo_truco_aceito():
     """
@@ -31,7 +21,6 @@ def test_fluxo_truco_aceito():
     jogador_1_id = 1
     jogador_2_id = 2
     
-    # CORREÇÃO: Usa cantar() (sem underscore)
     truco.cantar('TRUCO', jogador_1_id)
     
     assert truco.get_estado() == 'TRUCO'
@@ -87,7 +76,6 @@ def test_fluxo_vale4_aceito():
     assert truco.get_pontos() == 4 
     assert truco.get_quem_cantou_por_ultimo() == j1
 
-# --- Testes de Recusa (Não Aceitar) ---
 
 def test_fluxo_truco_nao_aceito():
     """
@@ -137,7 +125,6 @@ def test_fluxo_vale4_nao_aceito():
     assert truco.get_pontos() == 3
     assert truco.get_quem_cantou_por_ultimo() == j1
 
-# --- Testes de Reset ---
 
 def test_reset_truco():
     """
@@ -148,7 +135,6 @@ def test_reset_truco():
     
     truco.cantar('TRUCO', j1)
     
-    # CORREÇÃO: Usa reset_truco() (sem underscore)
     truco.reset_truco()
     
     assert truco.get_estado() == 'NAO_CANTADO'

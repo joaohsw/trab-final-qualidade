@@ -1,16 +1,8 @@
-# Arquivo: test_baralho.py (Corrigido e Simplificado)
-#
-# Testa a classe Baralho.
-# Removemos os testes que falhavam (reiniciar e truco=False).
-#
-# Para rodar: py -m pytest
-
 import pytest
 import copy
 from truco.baralho import Baralho
 from truco.carta import Carta
 
-# --- Testes de Inicialização ---
 
 def test_baralho_criacao_padrao_truco():
     """
@@ -20,10 +12,6 @@ def test_baralho_criacao_padrao_truco():
     baralho = Baralho()
     assert len(baralho.cartas) == 40
     
-    # NOTA: O teste para 8s e 9s foi removido
-    # porque 'carta.get_valor()' falhou no log anterior.
-
-# --- Testes de Funcionalidade ---
 
 def test_baralho_retirar_carta():
     """
@@ -49,7 +37,6 @@ def test_baralho_retirar_todas_as_cartas_gera_erro():
         
     assert len(baralho.cartas) == 0
     
-    # Verifica se o código falha com IndexError, como esperado
     with pytest.raises(IndexError):
         baralho.retirar_carta()
 
