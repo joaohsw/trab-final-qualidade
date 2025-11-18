@@ -5,110 +5,107 @@ from truco.carta import Carta
 from truco import envido
 from truco import flor
 
-
 def test_jogador_criacao():
-    """
-    Testa a criação (construtor __init__) de um jogador.
-    """
     jogador = Jogador("João")
-    
     assert jogador.nome == "João"
-    assert jogador.mao == []  
+    assert jogador.mao == []
 
 def test_receber_cartas():
-    """
-    Testa o método 'criar_mao'.
-    """
     jogador = Jogador("João")
-    
     carta1 = Carta(1, 'Espadas')
     carta2 = Carta(7, 'Ouros')
     carta3 = Carta(3, 'Copas')
-
     mock_baralho = MagicMock()
     mock_baralho.retirar_carta.side_effect = [carta1, carta2, carta3]
-
     jogador.criar_mao(mock_baralho)
-    
     assert len(jogador.mao) == 3
     assert str(jogador.mao[0]) == str(carta1)
 
-def test_limpar_mao():
-    """
-    Testa o método 'limpar_mao'.
-    (Se este teste falhar, é 100% um problema de cache __pycache__)
-    """
-    jogador = Jogador("João")
-    
-    jogador.mao = [Carta(1, 'Espadas'), Carta(7, 'Ouros')]
-    
-    assert len(jogador.mao) == 2  
-    
-    jogador.limpar_mao()
-    
-    assert len(jogador.mao) == 0  
-
 
 def test_jogar_carta_por_indice():
-    """
-    Testa o método 'jogar_carta' usando um índice (ex: 0, 1, 2).
-    """
     jogador = Jogador("João")
     carta1 = Carta(1, 'Espadas')
     carta2 = Carta(7, 'Ouros')
-    jogador.mao = [carta1, carta2] 
-    
+    jogador.mao = [carta1, carta2]
     carta_jogada = jogador.jogar_carta(1)
-    
     assert str(carta_jogada) == str(carta2)
     assert len(jogador.mao) == 1
     assert str(jogador.mao[0]) == str(carta1)
 
-
-def test_get_pontos_envido(mocker):
-    """
-    Testa o método 'get_pontos_envido'.
-    """
+def test_jogar_carta():
     jogador = Jogador("João")
     
-    mocker.patch('truco.envido.get_pontos_envido', return_value=27)
+    c1, c2, c3 = MagicMock(), MagicMock(), MagicMock()
+    jogador.mao = [c1, c2, c3]
     
-    cartas_envido_27 = [Carta(7, 'Espadas'), Carta(12, 'Espadas'), Carta(1, 'Ouros')]
-    jogador.mao = cartas_envido_27
-    assert jogador.get_pontos_envido() == 27
+    carta_jogada = jogador.jogar_carta(1)
+    
+    assert carta_jogada == c2
+    assert len(jogador.mao) == 2
+    assert jogador.mao == [c1, c3]
 
-def test_tem_flor(mocker):
-    """
-    Testa o método 'tem_flor'.
-    """
+def test_checa_flor_verdadeiro():
     jogador = Jogador("João")
     
-    mocker.patch('truco.flor.tem_flor', return_value=True)
+    c1 = MagicMock()
+    c2 = MagicMock()
+    c3 = MagicMock()
     
-    cartas_com_flor = [Carta(1, 'Ouros'), Carta(7, 'Ouros'), Carta(5, 'Ouros')]
-    jogador.mao = cartas_com_flor
-    assert jogador.tem_flor() is True
+    c1.retornar_naipe.return_value = 'Paus'
+    c2.retornar_naipe.return_value = 'Paus'
+    c3.retornar_naipe.return_value = 'Paus'
+    
+    jogador.mao = [c1, c2, c3]
+    
+    assert jogador.checa_flor() is True
 
-def test_get_pontos_flor(mocker):
-    """
-    Testa o método 'get_pontos_flor'.
-    """
+def test_checa_flor_falso():
     jogador = Jogador("João")
     
-    mocker.patch('truco.flor.get_pontos_flor', return_value=32)
+    c1 = MagicMock()
+    c2 = MagicMock()
+    c3 = MagicMock()
+    
+    c1.retornar_naipe.return_value = 'Paus'
+    c2.retornar_naipe.return_value = 'Copas' 
+    c3.retornar_naipe.return_value = 'Paus'
+    
+    jogador.mao = [c1, c2, c3]
+    
+    assert jogador.checa_flor() is False
 
-    cartas_flor_32 = [Carta(5, 'Ouros'), Carta(7, 'Ouros'), Carta(12, 'Ouros')]
-    jogador.mao = cartas_flor_32
-    assert jogador.get_pontos_flor() == 32
+def test_calcula_envido_logica():
 
-
-def test_cantar_acoes_simples():
-    """
-    Testa os métodos de "cantar" que existem no seu jogador.py
-    (Se este teste falhar, é 100% um problema de cache __pycache__)
-    """
     jogador = Jogador("João")
     
-    assert jogador.aceitar() == 'ACEITO'
-    assert jogador.nao_aceitar() == 'NAO ACEITO'
-    assert jogador.cantar_flor() == 'FLOR'
+    c1 = MagicMock()
+    c2 = MagicMock()
+    c3 = MagicMock()
+    
+    c1.retornar_naipe.return_value = 'Espadas'
+    c2.retornar_naipe.return_value = 'Espadas'
+    c3.retornar_naipe.return_value = 'Ouros'
+    
+    c1.retornar_pontos_envido.side_effect = lambda x: 7 if x == c1 else (3 if x == c2 else 0)
+    
+    jogador.mao = [c1, c2, c3]
+    
+    resultado = jogador.calcula_envido(jogador.mao)
+    
+    assert resultado == 30
+
+def test_resetar():
+    """Testa se o método resetar zera a mão e as flags."""
+    jogador = Jogador("João")
+    
+    jogador.mao = [1, 2, 3]
+    jogador.rodadas = 1
+    jogador.flor = True
+    jogador.pediu_truco = True
+    
+    jogador.resetar()
+    
+    assert jogador.rodadas == 0
+    assert jogador.mao == []
+    assert jogador.flor is False
+    assert jogador.pediu_truco is False

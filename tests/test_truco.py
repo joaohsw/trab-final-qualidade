@@ -1,142 +1,78 @@
 import pytest
+from unittest.mock import MagicMock, patch
 from truco.truco import Truco
 
+@pytest.fixture
+def setup_dados():
+    cbr_mock = MagicMock()
+    jogador1_mock = MagicMock()
+    jogador1_mock.pontos = 0
+    jogador2_mock = MagicMock()
+    jogador2_mock.pontos = 0
+    
+    jogador2_mock.avaliar_truco.return_value = 1
+    
+    return cbr_mock, jogador1_mock, jogador2_mock
 
 def test_truco_inicializacao():
-    """
-    Testa o estado inicial da classe Truco.
-    """
     truco = Truco()
     
-    assert truco.get_estado() == 'NAO_CANTADO'
-    assert truco.get_pontos() == 1
-    assert truco.get_quem_cantou_por_ultimo() is None
+    assert truco.estado_atual == "" 
+    assert truco.retornar_valor_aposta() == 1
+    assert truco.jogador_bloqueado == 0
 
-
-def test_fluxo_truco_aceito():
-    """
-    Testa o fluxo: Jogador 1 canta TRUCO, Jogador 2 ACEITA.
-    """
+def test_fluxo_pedir_truco(setup_dados):
+    cbr, j1, j2 = setup_dados
     truco = Truco()
-    jogador_1_id = 1
-    jogador_2_id = 2
     
-    truco.cantar('TRUCO', jogador_1_id)
+    truco.pedir_truco(cbr, 1, j1, j2)
     
-    assert truco.get_estado() == 'TRUCO'
-    assert truco.get_pontos() == 2
-    assert truco.get_quem_cantou_por_ultimo() == jogador_1_id
-    
-    truco.cantar('ACEITO', jogador_2_id)
-    
-    assert truco.get_estado() == 'TRUCO'
-    assert truco.get_pontos() == 2 
-    assert truco.get_quem_cantou_por_ultimo() == jogador_1_id
+    assert truco.estado_atual == "truco"
+    assert truco.jogador_bloqueado == 1 
 
-def test_fluxo_retruco_aceito():
-    """
-    Testa o fluxo: TRUCO -> RETRUCO -> ACEITO.
-    """
+def test_fluxo_pedir_retruco(setup_dados):
+    cbr, j1, j2 = setup_dados
     truco = Truco()
-    j1 = 1
-    j2 = 2
     
-    truco.cantar('TRUCO', j1)
-    truco.cantar('RETRUCO', j2)
-    
-    assert truco.get_estado() == 'RETRUCO'
-    assert truco.get_pontos() == 3
-    assert truco.get_quem_cantou_por_ultimo() == j2
-    
-    truco.cantar('ACEITO', j1)
-    
-    assert truco.get_estado() == 'RETRUCO'
-    assert truco.get_pontos() == 3 
-    assert truco.get_quem_cantou_por_ultimo() == j2
+    truco.estado_atual = "truco"
 
-def test_fluxo_vale4_aceito():
-    """
-    Testa o fluxo completo: TRUCO -> RETRUCO -> VALE4 -> ACEITO.
-    """
+    with patch('builtins.input', return_value='1'):
+        truco.pedir_retruco(cbr, 2, j1, j2)
+    
+    assert truco.estado_atual == "retruco"
+    assert truco.retornar_valor_aposta() == 3
+
+def test_fluxo_pedir_vale_quatro(setup_dados):
+    cbr, j1, j2 = setup_dados
     truco = Truco()
-    j1 = 1
-    j2 = 2
     
-    truco.cantar('TRUCO', j1)
-    truco.cantar('RETRUCO', j2)
-    truco.cantar('VALE4', j1)
+    truco.estado_atual = "retruco"
+    truco.valor_aposta = 3
     
-    assert truco.get_estado() == 'VALE4'
-    assert truco.get_pontos() == 4
-    assert truco.get_quem_cantou_por_ultimo() == j1
+    truco.pedir_vale_quatro(cbr, 1, j1, j2)
     
-    truco.cantar('ACEITO', j2)
-    
-    assert truco.get_estado() == 'VALE4'
-    assert truco.get_pontos() == 4 
-    assert truco.get_quem_cantou_por_ultimo() == j1
+    assert truco.retornar_valor_aposta() == 4
 
-
-def test_fluxo_truco_nao_aceito():
-    """
-    Testa o fluxo: Jogador 1 canta TRUCO, Jogador 2 NÃO ACEITA.
-    """
+def test_truco_recusado(setup_dados):
+    cbr, j1, j2 = setup_dados
     truco = Truco()
-    j1 = 1
-    j2 = 2
     
-    truco.cantar('TRUCO', j1)
-    truco.cantar('NAO ACEITO', j2)
+    j2.avaliar_truco.return_value = 0
     
-    assert truco.get_estado() == 'NAO_ACEITO'
-    assert truco.get_pontos() == 1 
-    assert truco.get_quem_cantou_por_ultimo() == j1
+    aceitou = truco.pedir_truco(cbr, 1, j1, j2)
+    
+    assert aceitou is False
+    assert j1.pontos == 1
 
-def test_fluxo_retruco_nao_aceito():
-    """
-    Testa o fluxo: TRUCO -> RETRUCO, Jogador 1 NÃO ACEITA.
-    """
+def test_resetar():
     truco = Truco()
-    j1 = 1
-    j2 = 2
     
-    truco.cantar('TRUCO', j1)
-    truco.cantar('RETRUCO', j2)
-    truco.cantar('NAO ACEITO', j1)
+    truco.valor_aposta = 4
+    truco.estado_atual = "retruco"
+    truco.jogador_bloqueado = 1
     
-    assert truco.get_estado() == 'NAO_ACEITO'
-    assert truco.get_pontos() == 2
-    assert truco.get_quem_cantou_por_ultimo() == j2
-
-def test_fluxo_vale4_nao_aceito():
-    """
-    Testa o fluxo: TRUCO -> RETRUCO -> VALE4, Jogador 2 NÃO ACEITA.
-    """
-    truco = Truco()
-    j1 = 1
-    j2 = 2
+    truco.resetar()
     
-    truco.cantar('TRUCO', j1)
-    truco.cantar('RETRUCO', j2)
-    truco.cantar('VALE4', j1)
-    truco.cantar('NAO ACEITO', j2)
-    
-    assert truco.get_estado() == 'NAO_ACEITO'
-    assert truco.get_pontos() == 3
-    assert truco.get_quem_cantou_por_ultimo() == j1
-
-
-def test_reset_truco():
-    """
-    Testa o método 'reset_truco' após uma aposta.
-    """
-    truco = Truco()
-    j1 = 1
-    
-    truco.cantar('TRUCO', j1)
-    
-    truco.reset_truco()
-    
-    assert truco.get_estado() == 'NAO_CANTADO'
-    assert truco.get_pontos() == 1
-    assert truco.get_quem_cantou_por_ultimo() is None
+    assert truco.retornar_valor_aposta() == 1
+    assert truco.estado_atual == ""
+    assert truco.jogador_bloqueado == 0
